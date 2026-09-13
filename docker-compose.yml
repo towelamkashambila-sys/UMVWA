@@ -1,0 +1,14 @@
+services:
+  umvwa:
+    build: .
+    ports:
+      - "8000:8000"
+    env_file: .env
+    environment:
+      UMVWA_DB_PATH: /data/umvwa.sqlite3
+      UMVWA_BACKUP_DIR: /data/backups
+      UMVWA_VOICE_DIR: /data/voice
+    volumes:
+      - umvwa-data:/data
+volumes:
+  umvwa-data:

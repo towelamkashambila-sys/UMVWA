@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: umvwa-pilot
+    runtime: docker
+    plan: free
+    healthCheckPath: /api/ready
+    envVars:
+      - key: UMVWA_ENV
+        value: production
+      - key: UMVWA_SEED_DEMO
+        value: "0"
+      - key: PYTHONPATH
+        value: /app/canonical_src
+      - key: DATABASE_URL
+        sync: false
