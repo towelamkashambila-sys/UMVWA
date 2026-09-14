@@ -1,6 +1,7 @@
 FROM python:3.13-slim
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 UMVWA_ENV=production UMVWA_SEED_DEMO=0
 WORKDIR /app
+ENV PYTHONPATH=/app/canonical_src
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
