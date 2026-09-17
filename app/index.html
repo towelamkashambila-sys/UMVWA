@@ -18,7 +18,22 @@
 @media(max-width:900px){.app{grid-template-columns:1fr}.sidebar{display:none}.main{padding:17px 15px 84px}.bottom-nav{position:fixed;display:grid;grid-template-columns:repeat(5,1fr);left:0;right:0;bottom:0;background:#0d1016;border-top:1px solid var(--border);z-index:10;padding:7px}.bottom-nav button{border:0;background:transparent;padding:8px 3px;font-size:11px;color:var(--muted)}.bottom-nav button.active{color:var(--text)}.hero{grid-template-columns:1fr}.hero img{max-height:300px;order:-1}.hero h2{font-size:34px}.cards,.three{grid-template-columns:1fr}.grid,.split{grid-template-columns:1fr}.topbar h1{font-size:23px}.top-actions .hide-mobile{display:none}.kv{grid-template-columns:105px 1fr}}
 </style></head>
 <body>
-  <div id="login"><div class="landing-screen"><div class="landing-visual"><img src="/assets/UMVWA_APPROVED_LANDING_HERO_SOURCE_OF_TRUTH.jpeg" alt="Two people aligned toward a shared destination"></div><div class="landing-content"><img class="standalone-symbol" src="/assets/UMVWA_STANDALONE_SYMBOL.png" alt="UMVWA symbol"><div class="landing-content"><div class="brand-lockup"><img class="standalone-symbol" src="/assets/UMVWA_STANDALONE_SYMBOL.png" alt="UMVWA symbol"><span class="brand-name">UMVWA</span></div><div class="landing-tag">LISTEN. UNDERSTAND. STAY ALIGNED.</div><p>Keeping leaders and their assistants in perfect sync.</p><button class="primary landing-button" onclick="openCommandCenter()">COMMAND CENTER</button></div><p>Keeping leaders and their assistants in perfect sync.</p><button class="primary landing-button" onclick="openCommandCenter()">COMMAND CENTER</button></div></div></div>
+<div id="login">
+  <div class="landing-screen">
+    <div class="landing-visual">
+      <img src="/assets/UMVWA_APPROVED_LANDING_HERO_SOURCE_OF_TRUTH.jpeg" alt="Two people aligned toward a shared destination">
+    </div>
+    <div class="landing-content">
+      <div class="brand-lockup">
+        <img class="standalone-symbol" src="/assets/UMVWA_STANDALONE_SYMBOL.png" alt="UMVWA symbol">
+        <span class="brand-name">UMVWA</span>
+      </div>
+      <div class="landing-tag">LISTEN. UNDERSTAND. STAY ALIGNED.</div>
+      <p>Keeping leaders and their assistants in perfect sync.</p>
+      <button class="primary landing-button" onclick="openCommandCenter()">COMMAND CENTER</button>
+    </div>
+  </div>
+</div>
 <div id="app" class="app hidden">
 <aside class="sidebar"><div class="brand-row"><img src="/assets/UMVWA_APPROVED_LOGO_SOURCE_OF_TRUTH.png" alt=""><div class="brand">UMVWA</div><span id="roleBadge" class="role-badge"></span></div><div class="tag" style="padding:0 7px">Listen. Understand. Stay Aligned.</div><nav class="nav"><button data-view="home" onclick="go('home')">⌂ Home</button><button data-view="work" onclick="go('work')">Work</button><button data-view="people" onclick="go('people')">People</button><button data-view="meetings" onclick="go('meetings')">Meetings</button><button data-view="voice" onclick="go('voice')">Voice notes</button><button data-view="ask" onclick="go('ask')">Ask UMVWA</button><button data-view="notifications" onclick="go('notifications')">Notifications <span id="navUnread"></span></button><button data-view="settings" onclick="go('settings')">Settings</button></nav><div class="sidebar-bottom"><div id="userCard" class="user-card"></div><button class="ghost" onclick="logout()">Sign out</button></div></aside>
 <main class="main"><div class="topbar"><div><div id="topKicker" class="eyebrow">Shared operational reality</div><h1 id="pageTitle">Home</h1></div><div class="top-actions"><button class="icon-btn" onclick="go('notifications')">Notifications <span id="topUnread" class="count hidden">0</span></button><button class="primary hide-mobile" onclick="openQuickWork()" id="quickAssign">+ Assign work</button></div></div>
