@@ -308,7 +308,111 @@ function go(view){state.view=view;document.querySelectorAll('.view').forEach(x=>
 function render(view){if(view==='home')renderHome();if(view==='work')renderWork();if(view==='people')renderPeople();if(view==='meetings')renderMeetings();if(view==='voice')renderVoice();if(view==='ask')renderAsk();if(view==='notifications')renderNotifications();if(view==='settings')renderSettings();}
 function workCard(w){return `<div class="item clickable" onclick="openWork('${esc(w.id)}')"><div class="item-head"><div class="item-title">${esc(w.description)}</div><span class="state ${esc(w.lifecycle_state)}">${esc(w.lifecycle_state.replaceAll('_',' '))}</span></div><div class="meta"><span>${w.assignee_id?'Assigned to '+esc(nameOf(w.assignee_id)):'Unassigned'}</span>${w.expected_completion?`<span>Due ${fmt(w.expected_completion)}</span>`:''}<span>${esc(w.temporal_state||'')}</span></div></div>`}
 function nameOf(id){return state.people.find(p=>p.id===id)?.name||id||'—'}
-function renderHome(){const active=state.work.filter(w=>!['COMPLETED','CANCELLED'].includes(w.lifecycle_state));const risk=active.filter(w=>['BLOCKED','WAITING'].includes(w.lifecycle_state));const mine=active.filter(w=>w.assignee_id===state.session.user_id);const cap=state.assistant?.operational_load??'—';const intro=state.session.role==='EXECUTIVE'?`<div class="hero"><div><div class="eyebrow">Driver's Seat</div><h2>What matters right now?</h2><p>UMVWA keeps the operational story visible: what is moving, what is waiting, what needs your decision, and where attention may be required.</p><div class="toolbar"><button class="primary" onclick="go('work')">Review work</button><button onclick="go('ask')">Ask UMVWA</button></div></div><img src="/assets/UMVWA_APPROVED_LANDING_HERO_SOURCE_OF_TRUTH.jpeg" alt="Two people aligned at an opening"></div>`:`<div class="hero"><div><div class="eyebrow">Assistant Operational Home</div><h2>What needs to move now?</h2><p>Your operational view brings together assigned work, waiting items, approvals, meetings, changes and carry-forward without turning your activity into surveillance.</p><div class="toolbar"><button class="primary" onclick="go('work')">Open my work</button><button onclick="go('voice')">Voice notes</button></div></div><img src="/assets/UMVWA_APPROVED_LANDING_HERO_SOURCE_OF_TRUTH.jpeg" alt="Two people aligned at an opening"></div>`;const metrics=state.session.role==='EXECUTIVE'?`<div class="cards"><div class="card"><h3>Needs attention</h3><div class="metric">${risk.length}</div><div class="muted">waiting or blocked</div></div><div class="card"><h3>Active shared work</h3><div class="metric">${active.length}</div><div class="muted">across the workspace</div></div><div class="card"><h3>Assistant capacity</h3><div class="metric" style="font-size:20px">${esc(state.assistant?.capacity?.[0]?.state||'Not declared')}</div><div class="muted">operational load ${cap}</div></div></div>`:`<div class="cards"><div class="card"><h3>My active work</h3><div class="metric">${mine.length}</div><div class="muted">assigned and moving</div></div><div class="card"><h3>Needs movement</h3><div class="metric">${mine.filter(w=>['BLOCKED','WAITING'].includes(w.lifecycle_state)).length}</div><div class="muted">waiting or blocked</div></div><div class="card"><h3>Capacity</h3><div class="metric" style="font-size:20px">${esc(state.assistant?.capacity?.[0]?.state||'Not declared')}</div><div class="muted">you own this declaration</div></div></div>`;document.getElementById('home').innerHTML=intro+metrics+`<div class="section-title"><h2>${state.session.role==='EXECUTIVE'?'Attention signals':'Priority work'}</h2><button class="ghost" onclick="go('work')">View all</button></div><div class="list">${(state.session.role==='EXECUTIVE'?risk:mine).slice(0,6).map(workCard).join('')||'<div class="empty">No immediate work signal. The shared reality is clear.</div>'}</div>`;}
+function renderHome(){
+  const isExecutive=state.session.role==='EXECUTIVE';
+
+  if(isExecutive){
+    document.getElementById('home').innerHTML=`
+      <div class="home-welcome">
+        <div class="eyebrow">Executive Home</div>
+        <h2>Good afternoon, ${esc(state.session?.name||'David')}.</h2>
+        <p>Before you get started, check your notifications. Don't miss important updates waiting for you.</p>
+        <button class="primary" onclick="go('notifications')">Check Notifications →</button>
+      </div>
+
+      <div class="home-grid">
+        <button class="home-intelligence" onclick="go('work')">
+          <div class="eyebrow">Attention</div>
+          <h3>What needs you?</h3>
+          <p>Decisions, approvals, direction and intervention that may require your attention.</p>
+          <span>Open what needs you →</span>
+        </button>
+
+        <button class="home-intelligence" onclick="go('work')">
+          <div class="eyebrow">Operational state</div>
+          <h3>What's happening?</h3>
+          <p>See what is moving across the operation and where work currently stands.</p>
+          <span>See what's happening →</span>
+        </button>
+
+        <button class="home-intelligence" onclick="go('work')">
+          <div class="eyebrow">Dependencies</div>
+          <h3>What's waiting?</h3>
+          <p>Understand who is waiting on whom, why it is waiting, and what can move next.</p>
+          <span>See what's waiting →</span>
+        </button>
+
+        <button class="home-intelligence" onclick="go('work')">
+          <div class="eyebrow">Signals</div>
+          <h3>What should you watch?</h3>
+          <p>Surface emerging drift, approaching deadlines and changes that may deserve attention.</p>
+          <span>Review signals →</span>
+        </button>
+
+        <button class="home-intelligence" onclick="go('meetings')">
+          <div class="eyebrow">Forward view</div>
+          <h3>What's coming next?</h3>
+          <p>Meetings, deadlines, decisions, commitments and other upcoming events.</p>
+          <span>See what's next →</span>
+        </button>
+
+        <button class="home-intelligence home-ask" onclick="go('ask')">
+          <div class="eyebrow">UMVWA intelligence</div>
+          <h3>Where should I start?</h3>
+          <p>Ask UMVWA to catch you up, explain what changed, identify what needs you, or guide you through the operation.</p>
+          <span>Ask UMVWA →</span>
+        </button>
+      </div>
+    `;
+    return;
+  }
+
+  const active=state.work.filter(w=>!['COMPLETED','CANCELLED'].includes(w.lifecycle_state));
+  const mine=active.filter(w=>w.assignee_id===state.session.user_id);
+  const waiting=mine.filter(w=>['BLOCKED','WAITING'].includes(w.lifecycle_state));
+
+  document.getElementById('home').innerHTML=`
+    <div class="hero">
+      <div>
+        <div class="eyebrow">Assistant Operational Home</div>
+        <h2>What needs to move now?</h2>
+        <p>Your operational view brings together assigned work, waiting items, approvals, meetings, changes and carry-forward without turning your activity into surveillance.</p>
+        <div class="toolbar">
+          <button class="primary" onclick="go('work')">Open my work</button>
+          <button onclick="go('voice')">Voice notes</button>
+        </div>
+      </div>
+      <img src="/assets/UMVWA_APPROVED_LANDING_HERO_SOURCE_OF_TRUTH.jpeg" alt="Two people aligned at an opening">
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <h3>My active work</h3>
+        <div class="metric">${mine.length}</div>
+        <div class="muted">assigned and moving</div>
+      </div>
+      <div class="card">
+        <h3>Needs movement</h3>
+        <div class="metric">${waiting.length}</div>
+        <div class="muted">waiting or blocked</div>
+      </div>
+      <div class="card">
+        <h3>Capacity</h3>
+        <div class="metric" style="font-size:20px">${esc(state.assistant?.capacity?.[0]?.state||'Not declared')}</div>
+        <div class="muted">you own this declaration</div>
+      </div>
+    </div>
+
+    <div class="section-title">
+      <h2>Priority work</h2>
+      <button class="ghost" onclick="go('work')">View all</button>
+    </div>
+
+    <div class="list">
+      ${mine.slice(0,6).map(workCard).join('')||'<div class="empty">No immediate work signal. The shared reality is clear.</div>'}
+    </div>
+  `;
+}
 async function saveUserPrefs(){const prefs={home_focus:(document.getElementById('prefFocus').value||'').split(',').map(x=>x.trim()).filter(Boolean),notifications:document.getElementById('prefNotify').value==='true',meeting_prep:document.getElementById('prefMeeting').value,timezone:document.getElementById('prefTimezone').value,date_format:document.getElementById('prefDate').value};await api('/api/preferences',{method:'PATCH',headers:{'content-type':'application/json'},body:JSON.stringify({preferences:prefs})});document.getElementById('prefSaved').textContent='Personal preferences saved.';}
 async function saveOrgConfig(){const payload={work_terms:document.getElementById('orgTerms').value,approval_rules:document.getElementById('orgApprovals').value,priority_rules:document.getElementById('orgPriorities').value,default_workflow:(document.getElementById('orgWorkflow').value||'').split(',').map(x=>x.trim()).filter(Boolean)};await api('/api/workspace/configuration',{method:'PATCH',headers:{'content-type':'application/json'},body:JSON.stringify({configuration:payload})});document.getElementById('orgSaved').textContent='Workspace operating preferences saved.';}
 async function renderSettings(){const p=(await api('/api/preferences')).preferences||{};const org=(await api('/api/workspace/configuration')).configuration||{};const escj=x=>esc(typeof x==='string'?x:JSON.stringify(x||{}));document.getElementById('settings').innerHTML=`<div class="notice"><b>UMVWA is adaptable by design.</b><div class="muted">Personalize how UMVWA presents and supports your work without changing the canonical operational truth, authority boundaries, evidence rules, or history.</div></div><div class="grid" style="margin-top:14px"><div class="card"><h2>Your preferences</h2><div class="field"><label>Home focus (comma-separated)</label><input id="prefFocus" value="${esc((p.home_focus||[]).join(', '))}" placeholder="decisions, risk, meetings"></div><div class="field"><label>Notifications</label><select id="prefNotify"><option value="true" ${p.notifications!==false?'selected':''}>On</option><option value="false" ${p.notifications===false?'selected':''}>Off</option></select></div><div class="field"><label>Meeting preparation style</label><select id="prefMeeting"><option ${p.meeting_prep==='concise'?'selected':''} value="concise">Concise</option><option ${p.meeting_prep==='standard'||!p.meeting_prep?'selected':''} value="standard">Standard</option><option ${p.meeting_prep==='detailed'?'selected':''} value="detailed">Detailed</option></select></div><div class="field"><label>Timezone</label><input id="prefTimezone" value="${esc(p.timezone||'Africa/Lusaka')}"></div><div class="field"><label>Date format</label><select id="prefDate"><option value="DD/MM/YYYY" ${p.date_format==='DD/MM/YYYY'||!p.date_format?'selected':''}>DD/MM/YYYY</option><option value="MM/DD/YYYY" ${p.date_format==='MM/DD/YYYY'?'selected':''}>MM/DD/YYYY</option><option value="YYYY-MM-DD" ${p.date_format==='YYYY-MM-DD'?'selected':''}>YYYY-MM-DD</option></select></div><button class="primary" onclick="saveUserPrefs()">Save my preferences</button><div id="prefSaved" class="ok" style="margin-top:8px"></div></div>${state.session.role==='EXECUTIVE'?`<div class="card"><h2>Workspace operating preferences</h2><p class="muted">These shape how the workspace operates. They cannot redefine UMVWA's canonical objects, authority, evidence, permissions or history.</p><div class="field"><label>Work terminology / labels</label><textarea id="orgTerms" rows="3" placeholder="Describe preferred terminology">${escj(org.work_terms||'')}</textarea></div><div class="field"><label>Approval rules</label><textarea id="orgApprovals" rows="3" placeholder="Describe normal approval routing">${escj(org.approval_rules||'')}</textarea></div><div class="field"><label>Priority rules</label><textarea id="orgPriorities" rows="3" placeholder="Describe what should surface first">${escj(org.priority_rules||'')}</textarea></div><div class="field"><label>Default workflow</label><input id="orgWorkflow" value="${esc((org.default_workflow||[]).join(', '))}" placeholder="ACKNOWLEDGED, STARTED, WAITING"></div><button class="primary" onclick="saveOrgConfig()">Save workspace preferences</button><div id="orgSaved" class="ok" style="margin-top:8px"></div></div>`:''}</div>`;document.getElementById('prefNotify').value=String(p.notifications!==false);}
